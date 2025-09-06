@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 3000;
 const server = createServer(app);
 
 // 🌍 Allowed frontend origins for CORS (Cross-Origin Resource Sharing)
-const allowedOrigins = [process.env.FRONTEND_URL,"http://localhost:5173","https://video-call-zeta-gold.vercel.app/login","https://video-call-1t74.onrender.com"]; 
+const allowedOrigins = [process.env.FRONTEND_URL,"https://video-call-zeta-gold.vercel.app/login"]; 
 console.log(allowedOrigins); // Debugging: Check if the frontend URL is loaded properly
 
 // 🔧 Middleware to handle CORS
