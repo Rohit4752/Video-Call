@@ -1,15 +1,79 @@
-import React from 'react'
-import { useUser } from '../../context/UserContextApi';
-import { Navigate, Outlet } from 'react-router-dom';
+import { useState } from "react";
+import { useUser } from "../context/UserContext";
 
-const IsLogin = () => {
-     const { user , loading } = useUser();
-    console.log("user ",user,"loading",loading)
-  // If user data is still loading, show a loader (prevent flickering issues)
-  if (loading) return <div>Loading...</div>;
+const Login = () => {
+  const { updateUser } = useUser();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // allow cookies
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Login failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Login response:", data);
+
+      if (data.user) {
+        updateUser(data.user); // ✅ saves to context + localStorage
+      } else {
+        setError("Invalid credentials");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Something went wrong, please try again.");
+    }
+  };
+
   return (
-    user ? <Outlet/> : <Navigate to='/login'/>
-  )
-}
+    <div className="flex items-center justify-center min-h-screen">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-6 rounded-xl shadow-md w-96"
+      >
+        <h2 className="text-xl font-semibold mb-4">Login</h2>
 
-export default IsLogin;
+        {error && <p className="text-red-500 mb-2">{error}</p>}
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border w-full p-2 rounded mb-3"
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border w-full p-2 rounded mb-3"
+          required
+        />
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white w-full py-2 rounded hover:bg-blue-700"
+        >
+          Login
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
